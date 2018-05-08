@@ -43,7 +43,10 @@ class Main {
 		TextureDraw.init();
 
 		texture = Image.create(800, 600, TextureFormat.RGBA128);
-		computeTexunit = Shaders.clear_comp.getTextureUnit("destTex");
+		computeTexunit = Shaders.triangle_comp.getTextureUnit("destTex");
+		p1 = Shaders.triangle_comp.getConstantLocation("p1");
+		p2 = Shaders.triangle_comp.getConstantLocation("p2");
+		p3 = Shaders.triangle_comp.getConstantLocation("p3");
 	}
 	
 	static function render(frame: Framebuffer): Void {
@@ -51,7 +54,7 @@ class Main {
 		Compute.setTexture(computeTexunit, texture, Access.Write);
 		Compute.compute(texture.width, texture.height, 1);
 
-		for (i in 0...Std.int(indices.length / 3)) {
+		for (i in 0...200) { //Std.int(indices.length / 3)) {
 			var i1 = indices[i * 3 + 0];
 			var i2 = indices[i * 3 + 1];
 			var i3 = indices[i * 3 + 2];
@@ -72,6 +75,12 @@ class Main {
 			//					vec2.x * scale + w / 2, vec2.y * scale + h / 2, vec2.z, tex2.x, tex2.y,
 			//					vec3.x * scale + w / 2, vec3.y * scale + h / 2, vec3.z, tex2.x, tex3.y);
 
+			Compute.setShader(Shaders.triangle_comp);
+			Compute.setTexture(computeTexunit, texture, Access.Write);
+			Compute.setFloat2(p1, vec1.x * scale + w / 2, vec1.y * scale + h / 2);
+			Compute.setFloat2(p2, vec2.x * scale + w / 2, vec2.y * scale + h / 2);
+			Compute.setFloat2(p3, vec3.x * scale + w / 2, vec3.y * scale + h / 2);
+			Compute.compute(texture.width, texture.height, 1);
 		}
 
 		TextureDraw.image(frame, texture);
